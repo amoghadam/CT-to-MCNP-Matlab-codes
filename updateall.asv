@@ -1,0 +1,31 @@
+function [Xypic,Yzpic,Xzpic]=updateall(pic,di)
+if di==1
+    Xypic=pic;
+    [klssx,klssy,klssz]=size(pic);
+    tpic=zeros(klssy,klssz,klssx);
+    for i=1:klssx
+        tpic(:,:,i)=spic(i,:,:);
+    end
+    Yzpic=tpic;
+    [klsxx,klsxy,klsxz]=size(pic);
+    ypic=zeros(klsxx,klsxz,klsxy);
+    for i=1:klsxy
+       ypic(:,:,i)=pic(:,i,:);
+    end
+    Xzpic=ypic;
+elseif di==2
+    Yzpic=pic;
+    [klssy,klssz,klssx]=size(pic);
+    tpic=zeros(klssx,klssy,klssz);
+    for i=1:klssz
+        tpic(:,:,i)=pic(:,i,:);
+    end
+    Xypic=tpic;
+    pic=tpic;
+    [klssy,klssz,klssx]=size(pic);
+    tpic=zeros(klssx,klssy,klssz);
+    
+    
+end
+    
+    

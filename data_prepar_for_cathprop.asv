@@ -1,0 +1,83 @@
+%ANN sample prep for water only
+load('preparation_needs.mat')
+ddata=xNdosedata2;
+dwdata=xwNdosedata2;
+
+ddata(:,77:end,:)=[];
+ddata(:,1:38,:)=[];
+ddata(39:end,:,:)=[];
+cdata=imresize(ddata(:,:,32),0.5);
+
+dwdata(:,77:end,:)=[];
+dwdata(:,1:38,:)=[];
+dwdata(39:end,:,:)=[];
+cwdata=imresize(dwdata(:,:,32),0.5);
+
+[rxs,rys]=size(cdata);
+amirhoz=[0.001*ones(5,rys);(0.7+(0.5*rand(rxs-5,rys)))];
+
+MC=cdata.*amirhoz;
+ANN=cwdata.*amirhoz;
+
+W=cwdata;
+
+a=[1:19];
+toosh=[0,0;0,0];
+for i=2:19
+    [xs,ys]=size(toosh);
+    ntoosh=[a(i)*ones(1,ys);toosh;a(i)*ones(1,ys)];
+    toosh=[a(i)*ones(xs+2,1),ntoosh,a(i)*ones(xs+2,1)];
+end
+meisam=(rand(size(toosh))-0.5).*toosh;
+
+meis=imresize(meisam,0.5)
+
+imagesc(ANN+(meis*amirhoz*1e-9))
+
+
+v=[8e-8 6e-8 4e-8 2e-8 1e-8 6e-9 2e-9 5e-10]
+
+TNN=ANN+(meis*amirhoz*1.7e-10);
+contour(TNN,v)
+hold on
+contour(MC,v,':')
+
+reler=(TNN-MC)./MC;
+vol=((abs(reler)./(((abs(reler)>1)*150)+(abs(reler)<=1))));
+wrel=(W-MC)./MC;
+wrel=wrel.*(imresize((toosh/8),0.5));
+fwrel=((wrel>1).*1)+((wrel<=1).*wrel);
+
+
+
+
+if 0
+RD=zeros(868,4000);
+DD=zeros(rxs*rys,4000);
+for i=1:4000
+    rorand=(2*rand(rxs,rys))+0.0005;
+    dodata=cdata*rorand;
+%     dodata(8:31,8:31)=zeros(24,24);
+    rorand(8:31,8:31)=-1*(ones(24,24));
+    Rrorand=deletezeros(reshape(rorand,(rxs*rys),1));
+    Rdodata=(reshape(dodata,(rxs*rys),1));
+    RD(:,i)=Rrorand;
+    DD(:,i)=Rdodata;
+end
+
+
+
+    
+
+rhodata=RD;
+dosedata=DD*1e8;
+length_dosedata=length(DD)
+length_rhodata=length(RD)
+fortest=200
+j=1;
+i=2;
+
+net=newfit(rhodata(:,1:(length_rhodata-fortest)),dosedata(j,1:(length_dosedata-fortest)),i);
+net=train(net,rhodata(:,1:(length_rhodata-fortest)),dosedata(j,1:(length_dosedata-fortest)));
+
+end
